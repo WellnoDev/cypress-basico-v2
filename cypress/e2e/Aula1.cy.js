@@ -2,6 +2,7 @@
 
 
 describe('Central de Atendimento ao Cliente TAT', () => {
+    const THREE_SECONDS_IN_MS = 3000
     beforeEach(function () {
         cy.visit('./src/index.html')
     })
@@ -11,6 +12,8 @@ describe('Central de Atendimento ao Cliente TAT', () => {
     it('preenche os campos obrigatórios e envia o formulário', function () {
         const longText = 'Teste com texto grande variando a velocidade onde o Cypress executa a digitação deste texto, referente a aula1 exercicio extra.'
 
+        cy.clock()
+
         cy.get('#firstName').should('be.visible').type('Wellison')
         cy.get('#lastName').should('be.visible').type('Silva')
         cy.get('#email').should('be.visible').type('wti.manutencao@gmail.com')
@@ -18,8 +21,12 @@ describe('Central de Atendimento ao Cliente TAT', () => {
         cy.get('#open-text-area').should('be.visible').type(longText, { delay: 0 })
         cy.contains('button', 'Enviar').click()
         cy.get('.success').should('be.visible')
+        cy.tick(THREE_SECONDS_IN_MS)
+        cy.get('.success').should('not.be.visible')
     })
     it('Erro e-mail com formatação invalida', function () {
+        cy.clock()
+
         cy.get('#firstName').should('be.visible').type('Wellison')
         cy.get('#lastName').should('be.visible').type('Silva')
         cy.get('#email').should('be.visible').type('wti.manutencao@g')
@@ -27,11 +34,15 @@ describe('Central de Atendimento ao Cliente TAT', () => {
         cy.get('#open-text-area').should('be.visible').type('texto')
         cy.contains('button', 'Enviar').click()
         cy.get('.error').should('be.visible')
+        cy.tick(THREE_SECONDS_IN_MS)
+        cy.get('.error').should('not.be.visible')
     })
     it('campo telefone continua vazio quando preenchido com valor não-númerico', function () {
         cy.get('#phone').type('abcdefgh').should('have.value', '')
     })
     it('exibe mensagem de erro quando o telefone se torna obrigatório mas não é preenchido antes do envio do formulário', function () {
+        cy.clock()
+
         cy.get('#firstName').should('be.visible').type('Wellison')
         cy.get('#lastName').should('be.visible').type('Silva')
         cy.get('#email').should('be.visible').type('wti.manutencao@gmail.com')
@@ -39,6 +50,8 @@ describe('Central de Atendimento ao Cliente TAT', () => {
         cy.get('#open-text-area').should('be.visible').type('texto')
         cy.contains('button', 'Enviar').click()
         cy.get('.error').should('be.visible')
+        cy.tick(THREE_SECONDS_IN_MS)
+        cy.get('.error').should('not.be.visible')
     })
     it('Limpando e validando so campos de digitação', function () {
         cy.get('#firstName').type('Wellison').should('have.value', 'Wellison').clear().should('have.value', '')
@@ -48,12 +61,20 @@ describe('Central de Atendimento ao Cliente TAT', () => {
         cy.get('#open-text-area').type('texto').should('have.value', 'texto').clear().should('have.value', '')
     })
     it('exibe mensagem de erro ao submeter o formulário sem preencher os campos obrigatórios.', function () {
+        cy.clock()
+
         cy.contains('button', 'Enviar').click()
         cy.get('.error').should('be.visible')
+        cy.tick(THREE_SECONDS_IN_MS)
+        cy.get('.error').should('not.be.visible')
     })
     it('envia o formuário com sucesso usando um comando customizado', function () {
+        cy.clock()
+
         cy.fillMandatoryFieldsAndSubmit()
         cy.get('.success').should('be.visible')
+        cy.tick(THREE_SECONDS_IN_MS)
+        cy.get('.success').should('not.be.visible')
     })
     it('seleciona um produto (YouTube) por seu texto', function () {
         cy.get('#product').select('youtube').should('have.value', 'youtube')
@@ -98,10 +119,5 @@ describe('Central de Atendimento ao Cliente TAT', () => {
     it('acessa a página da política de privacidade removendo o target e então clicando no link', function(){
         cy.get('#privacy a').invoke('removeAttr','target').click()
         cy.contains('CAC TAT - Política de privacidade').should('be.visible')
-    })
-    it('testa a página da política de privacidade de forma independente', function(){
-        cy.visit('./src/privacy.html')
-        cy.contains('#title', 'CAC TAT - Política de privacidade').should('be.visible')
-    })
-    
+    })    
 });
